@@ -6,6 +6,14 @@ import (
 	"os"
 )
 
+type Contact struct {
+	Name  string
+	Phone string
+	Email string
+}
+
+var Contacts []Contact
+
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("CLI Contact Manager")
@@ -22,7 +30,7 @@ func main() {
 
 		switch choice {
 		case "1":
-			fmt.Println("Add Contact")
+			addContact(scanner)
 		case "2":
 			fmt.Println("View Contacts")
 		case "3":
@@ -38,4 +46,24 @@ func main() {
 		}
 
 	}
+}
+
+func addContact(scanner *bufio.Scanner) {
+	fmt.Println("\nEnter Name")
+	scanner.Scan()
+	name := scanner.Text()
+	fmt.Println("\nEnter Phone Number")
+	scanner.Scan()
+	phone := scanner.Text()
+	fmt.Println("\nEnter Your Email")
+	scanner.Scan()
+	email := scanner.Text()
+
+	newContact := Contact{
+		name, phone, email,
+	}
+
+	Contacts = append(Contacts, newContact)
+
+	fmt.Println("\nContact Added Successfully : ", newContact)
 }
