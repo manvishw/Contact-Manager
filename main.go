@@ -2,19 +2,51 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Contact struct {
-	Name  string
-	Phone string
-	Email string
+	Name  string `json:"name"`
+	Phone string `json:"phone"`
+	Email string `json:"email"`
 }
 
 var contacts = make(map[string]Contact)
 
+func updateContacts() {
+	file, err := os.Open("contacts.json")
+	checkErr(err)
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&contacts)
+	checkErr(err)
+
+}
+func saveContacts() {
+	file, err := os.Create("contacts.json")
+	checkErr(err)
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ") // optional: for pretty formatting
+	err = encoder.Encode(contacts)
+	checkErr(err)
+
+	fmt.Println("Contacts is Saved")
+}
+
+func checkErr(err error) {
+	if err != nil {
+		fmt.Println("Error")
+	}
+}
+
 func main() {
+	updateContacts()
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("CLI Contact Manager")
 	for {
@@ -36,11 +68,12 @@ func main() {
 		case "2":
 			viewAllContacts(scanner)
 		case "3":
-			fmt.Println("Search Contact")
+			searchContact(scanner)
 		case "4":
-			fmt.Println("Delete Contact")
+			deleteContact(scanner)
 		case "5":
 			fmt.Println("Exiting...")
+			saveContacts()
 			return
 
 		default:
@@ -48,12 +81,13 @@ func main() {
 		}
 
 	}
+
 }
 
 func addContact(scanner *bufio.Scanner) {
 	fmt.Println("\nEnter Name")
 	scanner.Scan()
-	name := scanner.Text()
+	name := strings.ToLower(scanner.Text())
 	fmt.Println("\nEnter Phone Number")
 	scanner.Scan()
 	phone := scanner.Text()
@@ -79,4 +113,51 @@ func viewAllContacts(scanner *bufio.Scanner) {
 	}
 	fmt.Println("--- \n\n")
 
+}
+
+func searchContact(scanner *bufio.Scanner) {
+	fmt.Println("---------")
+	fmt.Println("Which Contact you want to search (Enter Name):")
+	scanner.Scan()
+
+	noOfContacts := 0
+
+	searchedName := strings.ToLower(scanner.Text())
+
+	for key, contact := range contacts {
+		if strings.Contains(key, searchedName) {
+			fmt.Println("Name => ", contact.Name, " Phone Number => ", contact.Phone, " Email => ", contact.Email)
+			noOfContacts++
+		}
+	}
+
+	if noOfContacts == 0 {
+		fmt.Println("No Contact Found")
+	}
+
+}
+
+func deleteContact(scanner *bufio.Scanner) {
+	fmt.Println("Enter Full Contact Name to Delete")
+	scanner.Scan()
+	deleteContactName := strings.ToLower(scanner.Text())
+
+	contactData, ok := contacts[deleteContactName]
+	if ok {
+		fmt.Println("Are you really want to Delete : ", contactData.Name)
+		fmt.Println("Enter yes | no ")
+		scanner.Scan()
+		yesOrNo := scanner.Text()
+
+		if yesOrNo == "yes" {
+			delete(contacts, deleteContactName)
+			fmt.Println("Contact is deleted Successfully!!")
+			return
+		} else {
+			return
+		}
+	} else {
+		fmt.Println("No contact found")
+		return
+	}
 }
