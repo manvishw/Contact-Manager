@@ -12,18 +12,20 @@ type Contact struct {
 	Email string
 }
 
-var Contacts []Contact
+var contacts = make(map[string]Contact)
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("CLI Contact Manager")
 	for {
+		fmt.Println("------------------------------")
+		fmt.Println("|     1. Add Contact         |")
+		fmt.Println("|     2. View Contacts       |")
+		fmt.Println("|     3. Search Contact      |")
+		fmt.Println("|     4. Delete Contact      |")
+		fmt.Println("|     5. Exit                |")
+		fmt.Println("------------------------------")
 
-		fmt.Println("1. Add Contact")
-		fmt.Println("2. View Contacts")
-		fmt.Println("3. Search Contact")
-		fmt.Println("4. Delete Contact")
-		fmt.Println("5. Exit")
 		fmt.Println("Enter your Choice:")
 		scanner.Scan()
 		choice := scanner.Text()
@@ -32,7 +34,7 @@ func main() {
 		case "1":
 			addContact(scanner)
 		case "2":
-			fmt.Println("View Contacts")
+			viewAllContacts(scanner)
 		case "3":
 			fmt.Println("Search Contact")
 		case "4":
@@ -63,7 +65,18 @@ func addContact(scanner *bufio.Scanner) {
 		name, phone, email,
 	}
 
-	Contacts = append(Contacts, newContact)
+	contacts[name] = newContact
 
-	fmt.Println("\nContact Added Successfully : ", newContact)
+	fmt.Println("\nContact Added Successfully : ", newContact, "\n\n")
+}
+
+func viewAllContacts(scanner *bufio.Scanner) {
+	fmt.Println("---  ")
+	fmt.Println("\n\nAvailabe Contacts\n")
+	fmt.Println("---  ")
+	for _, contact := range contacts {
+		fmt.Println("Name => ", contact.Name, " Phone Number => ", contact.Phone, " Email => ", contact.Email)
+	}
+	fmt.Println("--- \n\n")
+
 }
